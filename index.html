@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html ng-app="mercadoria" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<title>Inicio</title>
+<link rel="stylesheet" type="text/css" href="lib/bootstrap.css" />
+
+<!-- Bootstrap 3.3.5 -->
+<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+	<!-- Font Awesome -->
+	<link rel="stylesheet"
+		href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<!-- Ionicons -->
+		<link rel="stylesheet"
+			href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+			<!-- DataTables -->
+			<link rel="stylesheet"
+				href="plugins/datatables/dataTables.bootstrap.css">
+
+				<!-- Theme style -->
+				<link rel="stylesheet" href="dist/css/AdminLTE.min.css">
+<script src="lib/angular.js"></script>
+<script src="lib/angular-locale_pt-br.js"></script>
+<script src="lib/angular-messages.js"></script>
+<script src="js/dirPagination.js"></script>
+<script>
+		angular.module("mercadoria", ["angularUtils.directives.dirPagination","ngMessages"]);
+		angular.module("mercadoria").controller("mercadoriaCrtl", function($scope, $http){
+			$scope.mercadoria = {};
+			$scope.mercadorias = [];
+								
+			$scope.salvarMercadoria = function (mercadoria){
+				console.log(mercadoria);
+				$http.post("http://localhost:8080/mercadoria", mercadoria).success(function (data){
+					delete $scope.mercadoria;
+					console.log(data);
+					$scope.mercForm.$setPristine();
+					listarMercadoria();
+				});
+			}
+	
+			$scope.filterValue = function($event){
+				 var e = null;
+				  if ($event.keyCode)
+					   e = $event.keyCode;
+				   
+				   else if ($event.charCode)
+				  	 	e = $event.charCode; 
+				   
+				   else if ($event.which) 
+					    e = event.which;
+				    
+			       if(isNaN(String.fromCharCode(e)) && e !=8){
+			           $event.preventDefault();
+			       }
+			};
+	
+			
+			$scope.filterDouble = function($event){
+				 var e = null;
+				  if ($event.keyCode)
+					   e = $event.keyCode;
+				   
+				   else if ($event.charCode)
+				  	 	e = $event.charCode; 
+				   
+				   else if ($event.which) 
+					    e = event.which;
+
+					
+			       if(isNaN(String.fromCharCode(e)) && e != 46 && e !=8){
+			           $event.preventDefault();
+			       }
+			};
+	
+			$scope.limpar = function(){
+				delete $scope.mercadoria;
+				$scope.mercForm.$setPristine();
+			}
+	
+			var listarMercadoria = function(){
+				$http.get("http://localhost:8080/mercadoria").success(function (data){
+					$scope.mercadorias = data;
+				});
+			}
+	
+			$scope.alterarMercadoria = function (mercadoria){
+				$scope.mercadoria = mercadoria;
+			}
+	
+			$scope.excluirMercadoria = function (id){
+				$http.delete("http://localhost:8080/mercadoria/" + id).success(function (data){
+					listarMercadoria();
+				});
+			}
+	
+			listarMercadoria();
+					
+		});
+	</script>
+</head>
+<body ng-controller="mercadoriaCrtl"
+	class="hold-transition skin-blue layout-top-nav">
+	<div class="wrapper">
+		<div class="content-wrapper">
+
+			<div class="content">
+				<div class="row">
+					<div class="col-md-8 col-md-offset-2">
+						<div class="box">
+							<div class="box-body">
+								<form name="mercForm" class="form-horizontal">
+									<section class="content-header">
+									<h1 class="box-title">Mercadorias</h1>
+									</section>
+
+									<div style="font-size: 18px;"
+										ng-show="msg !=null && !mercForm.$dirty"
+										class="success alert-success">{{msg}}</div>
+
+									<div ng-show="mercForm.codigo.$dirty"
+										ng-messages="mercForm.codigo.$error">
+										<div ng-message="maxlength" class="alert alert-danger">
+											Campo código deve ter no máximo 8 caracteres</div>
+									</div>
+
+
+									<div ng-show="mercForm.nome.$dirty"
+										ng-messages="mercForm.nome.$error">
+										<div ng-message="maxlength" class="alert alert-danger">
+											Campo Nome deve ter no máximo 25 caracteres</div>
+									</div>
+
+									<div ng-show="mercForm.tipoMercadoria.$dirty"
+										ng-messages="mercForm.tipoMercadoria.$error">
+										<div ng-message="maxlength" class="alert alert-danger">
+											Campo Tipo de mercadoria deve ter no máximo 25 caracteres</div>
+									</div>
+
+
+									<div ng-show="mercForm.qtde.$dirty"
+										ng-messages="mercForm.qtde.$error">
+										<div ng-message="maxlength" class="alert alert-danger">Campo
+											Quantidade deve ter no máximo 7 digitos</div>
+
+										<div ng-message="min" class="alert alert-danger">Valor
+											Invalido</div>
+									</div>
+
+									<br></br>
+
+									<div class="form-group">
+
+										<label class="col-sm-2 control-label" for="codigo">Código:
+										</label>
+										<div class="col-md-3">
+											<input class="form-control" type="text" name="codigo"
+												ng-model="mercadoria.codigo"
+												ng-keypress="filterValue($event)"
+												placeholder="Informe o código" ng-required="true"
+												ng-maxlength="8" />
+										</div>
+										<label class="col-sm-2 control-label" for="nome">Nome:
+										</label>
+										<div class="col-md-4">
+											<input class="form-control" type="text" name="nome"
+												ng-model="mercadoria.nome"
+												placeholder="informe o nome da mercadoria"
+												ng-required="true" ng-maxlength="25" />
+										</div>
+
+
+									</div>
+
+									<div class="form-group">
+
+										<label class="col-sm-2 control-label" for="preco">Preço:
+										</label>
+										<div class="col-md-3">
+											<input class="form-control" type="text" name="preco"
+												ng-model="mercadoria.preco" ng-required="true"
+												maxlength="10" ng-keypress="filterDouble($event)"
+												ng-pattern="/^[0-9]+(\.[0-9]{1,2})?$/" step="0.01"
+												placeholder="informe o preço" ng-min="0" />
+										</div>
+
+										<label class="col-sm-2 control-label"
+											for="mercadoria.tipoMercadoria">Tipo da Mercadoria: </label>
+										<div class="col-md-4">
+											<input class="form-control" type="text" name="tipoMercadoria"
+												ng-model="mercadoria.tipoMercadoria" ng-required="true"
+												ng-maxlength="25" placeholder="informe o tipo da mercadoria" />
+										</div>
+
+									</div>
+
+									<div class="form-group">
+
+										<label class="col-md-2 control-label" for="qtde">Quantidade:
+										</label>
+										<div class="col-md-3">
+											<input class="form-control" type="number" name="qtde"
+												placeholder="informe a quantidade" ng-required="true"
+												maxlength="7" ng-model="mercadoria.qtde" ng-min="1" />
+										</div>
+
+										<label class="col-md-2 control-label" for="tpNeg">Tipo
+											do Negócio: </label>
+										<div class="col-md-4">
+											<select class="form-control" ng-model="mercadoria.tipoNegocio"
+												name="negocio" id="negocio" ng-required="true">
+												<option value="">Selecione uma operador</option>
+												<option value="Compra">Compra</option>
+												<option value="Venda">Venda</option>
+											</select>
+										</div>
+
+									</div>
+
+								</form>
+								<br />
+								<div class="form-group">
+									<div class="col-md-4 col-md-offset-2">
+										<button class="btn btn-danger btn-block"
+											ng-click="salvarMercadoria(mercadoria)"
+											ng-disabled="mercForm.$invalid">Salvar</button>
+									</div>
+
+									<div class="col-md-4">
+										<button class="btn btn-danger btn-block" ng-click="limpar()">Limpar
+											Campos</button>
+									</div>
+								</div>
+
+								<br />
+
+								<hr />
+								<div class="form-group">
+									<div class="col-md-8 col-md-offset-2">
+										<input class="form-control" type="text" ng-model="busca"
+											placeholder="Pesquisar..." />
+									</div>
+								</div>
+								<br /> <br />
+								<hr />
+
+								<table id="example1" class="table table-bordered table-striped"
+									ng-show="mercadorias.length > 0">
+									<thread>
+									<tr>
+										<th>Código</th>
+										<th>Nome</th>
+										<th>Tipo da Mercadoria</th>
+										<th>Preço</th>
+										<th>Quantidade</th>
+										<th>Tipo do Negócio</th>
+										<th style="text-align: center" colspan="2"><em
+											class="fa fa-cog"></em></th>
+									</tr>
+									</thread>
+									<tr
+										dir-paginate="mercadoria in mercadorias | filter:busca| itemsPerPage:10">
+										<td>{{mercadoria.codigo}}</td>
+										<td>{{mercadoria.nome}}</td>
+										<td>{{mercadoria.tipoMercadoria}}</td>
+										<td>{{mercadoria.preco | currency}}</td>
+										<td>{{mercadoria.qtde}}</td>
+										<td>{{mercadoria.tipoNegocio}}</td>
+
+										<td align="center"><a class="btn btn-default"
+											ng-click="alterarMercadoria(mercadoria)"><em
+												class="fa fa-pencil"></em></a> <a class="btn btn-danger"
+											ng-click="excluirMercadoria(mercadoria.codigo)"><em
+												class="fa fa-trash"></em></a></td>
+									</tr>
+								</table>
+
+								<dir-pagination-controls max-size="5" boundary-links="true"></dir-pagination-controls>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- REQUIRED JS SCRIPTS -->
+
+	<!-- jQuery 2.1.4 -->
+	<script src="plugins/jQuery/jQuery-2.1.4.min.js"></script>
+	<!-- Bootstrap 3.3.5 -->
+	<script src="bootstrap/js/bootstrap.min.js"></script>
+	<!-- AdminLTE App -->
+	<script src="dist/js/app.min.js"></script>
+	<!-- AdminLTE for demo purposes -->
+	<script src="dist/js/demo.js"></script>
+	<!-- FastClick -->
+	<script src="plugins/fastclick/fastclick.min.js"></script>
+	<!-- SlimScroll -->
+	<script src="plugins/slimScroll/jquery.slimscroll.min.js"></script>
+	<!-- DataTables -->
+	<script src="plugins/datatables/jquery.dataTables.min.js"></script>
+	<script src="plugins/datatables/dataTables.bootstrap.min.js"></script>
+	<!-- page script -->
+	<script>
+      $(function () {
+        $("#example1").DataTable();
+        $('#example2').DataTable({
+          "paging": true,
+          "lengthChange": false,
+          "searching": false,
+          "ordering": true,
+          "info": true,
+          "autoWidth": false
+        });
+      });
+    </script>
+</body>
+</html>
